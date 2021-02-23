@@ -8,7 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-swig-4.0.2/
+/*swig*
 build/
 develop-eggs/
 dist/
