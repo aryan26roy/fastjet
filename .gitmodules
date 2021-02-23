@@ -1,0 +1,3 @@
+[submodule "fastjet"]
+	path = fastjet
+	url = https://github.com/alisw/fastjet.git
