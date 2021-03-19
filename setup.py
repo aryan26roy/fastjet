@@ -5,7 +5,16 @@
 # or https://github.com/aryan26roy/fastjet.git for details.
 
 from setuptools import setup  # isort:skip
-
+import setuptools
+import setuptools.command.build_ext
+import setuptools.command.install
+from setuptools import setup, Extension
+import os
+import platform
+import subprocess 
+import sys
+import distutils.util
+import shutil
 # Available at setup time due to pyproject.toml
 from pybind11.setup_helpers import Pybind11Extension  # isort:skip
 
@@ -41,11 +50,9 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         build_args = []
         cmake_args = [
-            "-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
-            "-DPYTHON_EXECUTABLE={0}".format(sys.executable),
-            "-DPYBUILD=ON",
-            "-DPYBUILD=ON",
-            "-DBUILD_TESTING=OFF",
+            "-DCGAL_HEADER_ONLY=OFF".format(extdir),
+            "-DCMAKE_BUILD_TYPE=Release".format(sys.executable),
+            "..",
         ]
         try:
             compiler_path = self.compiler.compiler_cxx[0]
@@ -58,10 +65,10 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
 
         if platform.system() == "Windows":
-            cmake_args += [
-                "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir),
-                "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE",
-            ]
+            #cmake_args += [
+                #"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir),
+                #"-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE",
+            #]
             cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
             if (
                 sys.maxsize > 2 ** 32
@@ -84,12 +91,30 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         build_dir = self.build_temp
 
         subprocess.check_call(
-            [CMAKE, "-S", ext.sourcedir, "-B", build_dir] + cmake_args
+            [CMAKE,"-DCGAL_HEADER_ONLY=OFF","-DCMAKE_BUILD_TYPE=Release",".."] + cmake_args,cwd="/cgal/build_dir"
         )
-        subprocess.check_call([CMAKE, "--build", build_dir] + build_args)
         subprocess.check_call(
-            [CMAKE, "--build", build_dir, "--config", cfg, "--target", "install"]
+            ["make"],cwd="/cgal/build_dir"
         )
+        subprocess.check_call(
+            ["make", "install"],cwd="/cgal/build_dir"
+        )
+        subprocess.check_call(
+            ["./configure", "--prefix=$PWD/../../cgal/buildf_dir", "--enable-trackjet", "--enable-atlascone", "--enable-cmsiterativecone", "--enable-d0runicone", "--enable-d0runiicone", "--enable-swig", "--enable-pyext", "--with-cgaldir=$PWD/../../cgal/build_dir", "--enable-cgal:", "--enable-pxcone"],cwd="/fastjet/fastjet"
+        )
+        subprocess.check_call(
+            ["make"],cwd="/fastjet/fastjet"
+        )
+        subprocess.check_call(
+            ["make", "check"],cwd="/fastjet/fastjet"
+        )
+        subprocess.check_call(
+            ["make", "install"],cwd="/fastjet/fastjet"
+        )
+        #subprocess.check_call([CMAKE, "--build", build_dir] + build_args)
+        #subprocess.check_call(
+            #[CMAKE, "--build", build_dir, "--config", cfg, "--target", "install"]
+        #)
 
 
 ext_modules = [
@@ -97,10 +122,15 @@ ext_modules = [
         "fastjet._core",
         ["src/main.cpp"],
         cxx_std=11,
-    ),
+    ),CMakeExtension("cgal")
 ]
 
 
 setup(
     ext_modules=ext_modules,
+    cmdclass={"build_ext": CMakeBuild}, #"install": Install},
+    setup_requires=['pybind11>=2.2'],
+    install_requires=[
+        'numpy','pybind11>=2.2'
+    ]
 )
