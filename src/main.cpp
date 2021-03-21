@@ -5,7 +5,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include "fastjet/ClusterSequence.hh"
-#define infinity 9999
 #include <algorithm>
 #include <pybind11/stl.h>
 using namespace fastjet;

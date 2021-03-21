@@ -15,6 +15,7 @@ import subprocess
 import sys
 import distutils.util
 import shutil
+import multiprocessing
 # Available at setup time due to pyproject.toml
 from pybind11.setup_helpers import Pybind11Extension  # isort:skip
 
@@ -28,7 +29,7 @@ try:
     CMAKE = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
 except ImportError:
     CMAKE = "cmake"
-    
+cwdd = os.getcwd()    
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
         Extension.__init__(self, name, sources=[])
@@ -90,26 +91,26 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             os.makedirs(self.build_temp)
         build_dir = self.build_temp
 
+        #subprocess.check_call(
+        #    [CMAKE,"-DCGAL_HEADER_ONLY=OFF","-DCMAKE_BUILD_TYPE=Release",".."],cwd= cwdd+"/cgal/build_dir"
+        #)
+        #subprocess.check_call(
+        #    ["make"],cwd="cgal/build_dir"
+        #)
+        #subprocess.check_call(
+         #   ["make", "install"],cwd="cgal/build_dir"
+        #)
         subprocess.check_call(
-            [CMAKE,"-DCGAL_HEADER_ONLY=OFF","-DCMAKE_BUILD_TYPE=Release",".."] + cmake_args,cwd="/cgal/build_dir"
+            ["./configure", "--prefix=$PWD/../../cgal/buildf_dir", "--enable-trackjet", "--enable-atlascone", "--enable-cmsiterativecone", "--enable-d0runicone", "--enable-d0runiicone", "--enable-swig", "--enable-pyext", "--with-cgaldir=$PWD/../../cgal/build_dir", "--enable-cgal:", "--enable-pxcone"],cwd=cwdd+"/fastjet/fastjet"
         )
         subprocess.check_call(
-            ["make"],cwd="/cgal/build_dir"
+            ["make"],cwd=cwdd+"/fastjet/fastjet"
         )
         subprocess.check_call(
-            ["make", "install"],cwd="/cgal/build_dir"
+            ["make", "check"],cwd=cwdd+"/fastjet/fastjet"
         )
         subprocess.check_call(
-            ["./configure", "--prefix=$PWD/../../cgal/buildf_dir", "--enable-trackjet", "--enable-atlascone", "--enable-cmsiterativecone", "--enable-d0runicone", "--enable-d0runiicone", "--enable-swig", "--enable-pyext", "--with-cgaldir=$PWD/../../cgal/build_dir", "--enable-cgal:", "--enable-pxcone"],cwd="/fastjet/fastjet"
-        )
-        subprocess.check_call(
-            ["make"],cwd="/fastjet/fastjet"
-        )
-        subprocess.check_call(
-            ["make", "check"],cwd="/fastjet/fastjet"
-        )
-        subprocess.check_call(
-            ["make", "install"],cwd="/fastjet/fastjet"
+            ["make", "install"],cwd=cwdd+"/fastjet/fastjet"
         )
         #subprocess.check_call([CMAKE, "--build", build_dir] + build_args)
         #subprocess.check_call(
