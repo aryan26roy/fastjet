@@ -1,6 +1,3 @@
-[submodule "fastjet"]
-	path = fastjet
-	url = https://github.com/alisw/fastjet.git
 [submodule "cgal"]
 	path = cgal
 	url = https://github.com/CGAL/cgal.git
