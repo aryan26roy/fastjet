@@ -10,8 +10,10 @@ set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXE_LINKER_FLAGS "-static")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/fastjet/fastjet")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/fastjet")
 include_directories(/${CMAKE_CURRENT_SOURCE_DIR}/cgal/buildf_dir/bin)
+include_directories(/${CMAKE_CURRENT_SOURCE_DIR}/cgal/buildf_dir/include/fastjet)
+include_directories(/${CMAKE_CURRENT_SOURCE_DIR}/cgal/buildf_dir/lib)
 find_package(FASTJET REQUIRED)
 
 
@@ -22,4 +24,5 @@ link_directories(${FASTJET_LIBS_DIR})
 add_definitions(${FASTJET_DEFINITIONS})
 
 pybind11_add_module(_core src/main.cpp SHARED)
+target_link_libraries (_core LINK_PUBLIC ${FASTJET})
 set_target_properties(_core PROPERTIES CXX_VISIBILITY_PRESET hidden POSITION_INDEPENDENT_CODE TRUE)

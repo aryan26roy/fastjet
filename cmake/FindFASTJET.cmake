@@ -37,7 +37,7 @@ set(FASTJET_FOUND FALSE)
 if(FASTJET)
 
     # Check for fastjet-config script
-    find_program(FASTJET_CONFIG NAMES fastjet-config PATHS ${CMAKE_SOURCE_DIR}/fastjet/fastjet NO_DEFAULT_PATH)
+    find_program(FASTJET_CONFIG NAMES fastjet-config PATHS ${CMAKE_SOURCE_DIR}/fastjet NO_DEFAULT_PATH)
     if(NOT FASTJET_CONFIG)
         message(FATAL_ERROR "Could not find fastjet-config executable")
     endif(NOT FASTJET_CONFIG)
