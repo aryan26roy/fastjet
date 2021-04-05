@@ -28,8 +28,7 @@ try:
 
     CMAKE = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
 except ImportError:
-    CMAKE = "cmake"
-cwdd = os.getcwd()    
+    CMAKE = "cmake"   
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
         Extension.__init__(self, name, sources=[])
@@ -91,8 +90,8 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         build_dir = self.build_temp
-        
-        subprocess.Popen([CMAKE,"-DCGAL_HEADER_ONLY=OFF","-DCMAKE_BUILD_TYPE=Release",".."],cwd= cwdd+"/cgal/build_dir")
+        cwdd = os.getcwd() 
+        #subprocess.Popen([CMAKE,"-DCGAL_HEADER_ONLY=OFF","-DCMAKE_BUILD_TYPE=Release",".."],cwd= cwdd+"/cgal/build_dir")
         #except subprocess.CalledProcessError as e:
         #	print(e.output)
         #try:
@@ -104,30 +103,27 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         #except subprocess.CalledProcessError as e:
        # 	print(e.output)
         #try:
-        subprocess.Popen(
-            	["./configure", "--prefix=$PWD/../../cgal/buildf_dir", "--enable-trackjet", "--enable-atlascone", "--enable-cmsiterativecone", "--enable-d0runicone", "--enable-d0runiicone", "--enable-swig", "--enable-pyext", "--with-cgaldir=$PWD/../../cgal/build_dir", "--enable-cgal:", "--enable-pxcone"],cwd=cwdd+"/fastjet/fastjet")
-        	#subprocess.check_call(["make"],cwd=cwdd+"/fastjet/fastjet")
+        #raise ValueError(cwdd)
+        path = "--prefix="+cwdd+"/cgal/buildf_dir"
+        subprocess.call(["pwd"],cwd=cwdd+"/fastjet")
+        subprocess.call(
+            	["./configure", path, "--enable-trackjet", "--enable-atlascone", "--enable-cmsiterativecone", "--enable-d0runicone", "--enable-d0runiicone", "--enable-swig", "--enable-pyext", "--enable-pxcone"],cwd=cwdd+"/fastjet")
+        	#subprocess.check_call(["make"],cwd=cwdd+"/fastjet")
         #except subprocess.CalledProcessError as e:
-        	#print(e.output)
-        try:	
-        	subprocess.check_call(["make", "check"],cwd=cwdd+"/fastjet/fastjet")
-        except subprocess.CalledProcessError as e:
-        	print(e.output)
-        try:	
-        	subprocess.check_call(["make", "install"],cwd=cwdd+"/fastjet/fastjet")
-        except subprocess.CalledProcessError as e:
-        	print(e.output)
+        	#print(e.output)	
+        subprocess.call(["make", "check"],cwd=cwdd+"/fastjet")	
+        subprocess.call(["make", "install"],cwd=cwdd+"/fastjet")
         #subprocess.check_call([CMAKE, "--build", build_dir] + build_args)
         #subprocess.check_call(
             #[CMAKE, "--build", build_dir, "--config", cfg, "--target", "install"]
         #)
 
-ext_modules = [
+ext_modules = [CMakeExtension("Fastjet"),
     Pybind11Extension(
         "fastjet._core",
         ["src/main.cpp"],
         cxx_std=11,
-    ),CMakeExtension("cgal")
+    ),
 ]
 
 
