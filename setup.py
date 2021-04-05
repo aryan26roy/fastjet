@@ -132,6 +132,6 @@ setup(
     cmdclass={"build_ext": CMakeBuild}, #"install": Install},
     setup_requires=['pybind11>=2.2'],
     install_requires=[
-        'numpy','pybind11>=2.2'
+        'numpy','pybind11>=2.2', 'cmake'
     ]
 )
