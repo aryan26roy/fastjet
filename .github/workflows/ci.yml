@@ -51,4 +51,4 @@ jobs:
       run: python -m pip install -e .[test] -v
 
     - name: Test package
-      run: python -m pytest -ra
+      run: python -m pytest -s -ra
