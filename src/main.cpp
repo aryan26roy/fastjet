@@ -14,8 +14,8 @@ using namespace std;
 void interface(){
   vector<PseudoJet> particles;
   // an event with three particles:   px    py  pz      E
-  particles.push_back( PseudoJet(   99.0,  0.1,  0, 100.0) ); 
-  particles.push_back( PseudoJet(    4.0, -0.1,  0,   5.0) ); 
+  particles.push_back( PseudoJet(   99.0,  0.1,  0, 100.0) );
+  particles.push_back( PseudoJet(    4.0, -0.1,  0,   5.0) );
   particles.push_back( PseudoJet(  -99.0,    0,  0,  99.0) );
 
   // choose a jet definition
@@ -32,7 +32,7 @@ void interface(){
   // print the jets
   cout <<   "        pt y phi" << endl;
   for (unsigned i = 0; i < jets.size(); i++) {
-    cout << "jet " << i << ": "<< jets[i].pt() << " " 
+    cout << "jet " << i << ": "<< jets[i].pt() << " "
                    << jets[i].rap() << " " << jets[i].phi() << endl;
     vector<PseudoJet> constituents = jets[i].constituents();
     for (unsigned j = 0; j < constituents.size(); j++) {
