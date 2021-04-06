@@ -49,7 +49,7 @@ jobs:
 
     - name: Install Fortran on macOS
       if: runner.os == 'macOS'
-      run: brew install gfortran
+      run: brew install gfortran-8
 
     - name: Install SWIG on macOS
       if: runner.os == 'macOS'
