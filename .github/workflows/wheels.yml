@@ -31,7 +31,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
       with:
-        submodules: true
+        submodules: recursive
 
     - uses: joerick/cibuildwheel@v1.8.0
       env:
