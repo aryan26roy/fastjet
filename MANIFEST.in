@@ -1,6 +1,4 @@
-graft src
-graft tests
-graft cgal
-graft fastjet
-graft pybind11
+include cgal
+include fastjet
+include pybind11
 include LICENSE README.md pyproject.toml setup.py setup.cfg
