@@ -1,9 +1,6 @@
-prune *
 graft src
 graft tests
-recursive-include fastjet *
-recursive-include pybind11/include/pybind11 *
-recursive-include pybind11/tools 
+graft cgal
+graft fastjet
+graft pybind11
 include LICENSE README.md pyproject.toml setup.py setup.cfg
-include pybind11/CMakeLists.txt pybind11/LICENSE pybind11/README.md pybind11/CONTRIBUTING.md
-global-exclude __pycache__ *.py[cod] .*
