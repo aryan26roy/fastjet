@@ -40,6 +40,8 @@ class FastJetBuild(setuptools.command.build_ext.build_ext):
         env["PYTHON"] = sys.executable
         env["PYTHON_INCLUDE"] = f'-I{sysconfig.get_path("include")}'
         env["CXXFLAGS"] = "-fPIC"
+        if sys.platform.startswith("darwin"):
+            env["FC"] = "gfortran"
 
         subprocess.run(["./autogen.sh"], cwd=MAINDIR, env=env, check=True)
         subprocess.run(
