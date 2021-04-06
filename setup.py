@@ -53,6 +53,7 @@ class FastJetBuild(setuptools.command.build_ext.build_ext):
         env["NOCONFIGURE"] = "1"
         env["PYTHON"] = sys.executable
         env["PYTHON_INCLUDE"] = f'-I{sysconfig.get_path("include")}'
+        env["CXXFLAGS"] = "-fPIC"
 
         subprocess.run(["./autogen.sh"], cwd=MAINDIR, env=env, check=True)
         subprocess.run(
