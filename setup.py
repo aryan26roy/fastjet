@@ -11,12 +11,15 @@ import setuptools.command.install
 from setuptools import setup, Extension
 import os
 import platform
-import subprocess 
+import subprocess
 import sys
 import distutils.util
 import shutil
 import multiprocessing
+import sysconfig
 from setuptools.extension import Library
+from pathlib import Path
+
 # Available at setup time due to pyproject.toml
 from pybind11.setup_helpers import Pybind11Extension  # isort:skip
 
@@ -24,116 +27,70 @@ from pybind11.setup_helpers import Pybind11Extension  # isort:skip
 #   Sort input source files if you glob sources to ensure bit-for-bit
 #   reproducible builds (https://github.com/pybind/python_example/pull/53)
 
-try:
-    import cmake
 
-    CMAKE = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
-except ImportError:
-    CMAKE = "cmake"   
+DIR = Path(__file__).parent.resolve()
+MAINDIR = DIR / "fastjet"
 
-class CMakeBuild(setuptools.command.build_ext.build_ext):
+class FastJetBuild(setuptools.command.build_ext.build_ext):
     def build_extensions(self):
-        try:
-            out = subprocess.call([CMAKE, "--version"])
-        except OSError:
-            raise RuntimeError(
-                "CMake must be installed to build the following extensions: "
-                + ", ".join(x.name for x in self.extensions)
-            )
-
-        for x in self.extensions:
-            if isinstance(x, CMakeExtension): 
-            	self.build_extension(x)
-            else:
-            	setuptools.command.build_ext.build_ext.build_extension(self, x)
-           
-
-    def build_extension(self, ext):
-        subprocess.Popen(["echo","$PWD"])
-        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+        subprocess.Popen(["echo", "$PWD"])
         build_args = []
-        cmake_args = [
-            "-DCGAL_HEADER_ONLY=OFF".format(extdir),
-            "-DCMAKE_BUILD_TYPE=Release".format(sys.executable),
-            "..",
-        ]
         try:
             compiler_path = self.compiler.compiler_cxx[0]
-            cmake_args += ["-DCMAKE_CXX_COMPILER={0}".format(compiler_path)]
         except AttributeError:
             print("Not able to access compiler path, using CMake default")
 
-        cfg = "Debug" if self.debug else "Release"
-        build_args += ["--config", cfg]
-        cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
-
-        if platform.system() == "Windows":
-            #cmake_args += [
-                #"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir),
-                #"-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE",
-            #]
-            cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
-            if (
-                sys.maxsize > 2 ** 32
-                and cmake_generator != "NMake Makefiles"
-                and "Win64" not in cmake_generator
-            ):
-                cmake_args += ["-A", "x64"]
-
-        elif "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
-            build_args += ["-j", str(multiprocessing.cpu_count())]
-
-        if (
-            platform.system() == "Darwin"
-            and "MACOSX_DEPLOYMENT_TARGET" not in os.environ
-        ):
-            cmake_args += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9"]
-
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        build_dir = self.build_temp
-        cwdd = os.getcwd() 
-        #subprocess.Popen([CMAKE,"-DCGAL_HEADER_ONLY=OFF","-DCMAKE_BUILD_TYPE=Release",".."],cwd= cwdd+"/cgal/build_dir")
-        #except subprocess.CalledProcessError as e:
-        #	print(e.output)
-        #try:
-        #    subprocess.check_call(["make"],cwd=cwdd+"cgal/build_dir")
-        #except subprocess.CalledProcessError as e:
-        #    print(e.output)
-        #try:
-        #    subprocess.check_call(["make", "install"],cwd=cwd"cgal/build_dir")
-        #except subprocess.CalledProcessError as e:
-       # 	print(e.output)
-        #try:
-        #raise ValueError(cwdd)
-        path = "--prefix="+cwdd+"/cgal/buildf_dir"
-        subprocess.call(["pwd"],cwd=cwdd+"/fastjet")
-        subprocess.call(
-            	["./configure", path, "--enable-trackjet", "--enable-atlascone", "--enable-cmsiterativecone", "--enable-d0runicone", "--enable-d0runiicone", "--enable-swig", "--enable-pyext", "--enable-pxcone"],cwd=cwdd+"/fastjet")
-        	#subprocess.check_call(["make"],cwd=cwdd+"/fastjet")
-        #except subprocess.CalledProcessError as e:
-        	#print(e.output)	
-        subprocess.call(["make", "check"],cwd=cwdd+"/fastjet")	
-        subprocess.call(["make", "install"],cwd=cwdd+"/fastjet")
-        #subprocess.check_call([CMAKE, "--build", build_dir] + build_args)
-        #subprocess.check_call(
-            #[CMAKE, "--build", build_dir, "--config", cfg, "--target", "install"]
-        #)
 
-ext_modules = [CMakeExtension("Fastjet"),
+        build_dir = self.build_temp
+
+
+        path = f"--prefix={DIR}/cgal/buildf_dir"
+        print("HENRYIII", self.build_temp, MAINDIR, path, flush=True)
+        subprocess.call(["pwd"], cwd=MAINDIR)
+        env = os.environ.copy()
+        env["NOCONFIGURE"] = "1"
+        env["PYTHON"] = sys.executable
+        env["PYTHON_INCLUDE"] = f'-I{sysconfig.get_path("include")}'
+
+        subprocess.run(["./autogen.sh"], cwd=MAINDIR, env=env, check=True)
+        subprocess.run(
+            [
+                "./configure",
+                path,
+                "--enable-trackjet",
+                "--enable-atlascone",
+                "--enable-cmsiterativecone",
+                "--enable-d0runicone",
+                "--enable-d0runiicone",
+                "--enable-swig",
+                "--enable-pyext",
+                "--enable-pxcone",
+            ],
+            cwd=MAINDIR,
+            check=True,
+            env=env,
+        )
+        subprocess.call(["make", "check"], cwd=MAINDIR)
+        subprocess.call(["make", "install"], cwd=MAINDIR)
+
+        setuptools.command.build_ext.build_ext.build_extensions(self)
+
+
+ext_modules = [
     Pybind11Extension(
         "fastjet._core",
         ["src/main.cpp"],
-        cxx_std=11,libraries=["fastjet/cgal/buildf_dir/lib/libfastjet.a"] 
+        cxx_std=11,
+        include_dirs=["fastjet/include"],
+        extra_objects=[f"{DIR}/cgal/buildf_dir/lib/libfastjet.a"],
     ),
 ]
 
 
 setup(
     ext_modules=ext_modules,
-    cmdclass={"build_ext": CMakeBuild}, #"install": Install},
-    setup_requires=['pybind11>=2.2'],
-    install_requires=[
-        'numpy','pybind11>=2.2', 'cmake'
-    ]
+    cmdclass={"build_ext": FastJetBuild},
+    install_requires=["numpy"],
 )
