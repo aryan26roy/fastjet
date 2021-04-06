@@ -16,6 +16,7 @@ import sys
 import distutils.util
 import shutil
 import multiprocessing
+from setuptools.extension import Library
 # Available at setup time due to pyproject.toml
 from pybind11.setup_helpers import Pybind11Extension  # isort:skip
 
@@ -29,14 +30,11 @@ try:
     CMAKE = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
 except ImportError:
     CMAKE = "cmake"   
-class CMakeExtension(Extension):
-    def __init__(self, name, sourcedir=""):
-        Extension.__init__(self, name, sources=[])
-        self.sourcedir = os.path.abspath(sourcedir)
+
 class CMakeBuild(setuptools.command.build_ext.build_ext):
     def build_extensions(self):
         try:
-            out = subprocess.check_output([CMAKE, "--version"])
+            out = subprocess.call([CMAKE, "--version"])
         except OSError:
             raise RuntimeError(
                 "CMake must be installed to build the following extensions: "
@@ -44,7 +42,11 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             )
 
         for x in self.extensions:
-            self.build_extension(x)
+            if isinstance(x, CMakeExtension): 
+            	self.build_extension(x)
+            else:
+            	setuptools.command.build_ext.build_ext.build_extension(self, x)
+           
 
     def build_extension(self, ext):
         subprocess.Popen(["echo","$PWD"])
@@ -122,7 +124,7 @@ ext_modules = [CMakeExtension("Fastjet"),
     Pybind11Extension(
         "fastjet._core",
         ["src/main.cpp"],
-        cxx_std=11,
+        cxx_std=11,libraries=["fastjet/cgal/buildf_dir/lib/libfastjet.a"] 
     ),
 ]
 
