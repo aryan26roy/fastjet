@@ -10,6 +10,8 @@ import subprocess
 import sys
 import sysconfig
 from pathlib import Path
+import distutils.util
+import shutil
 
 import setuptools
 import setuptools.command.build_ext
@@ -39,7 +41,7 @@ class FastJetBuild(setuptools.command.build_ext.build_ext):
         env["NOCONFIGURE"] = "1"
         env["PYTHON"] = sys.executable
         env["PYTHON_INCLUDE"] = f'-I{sysconfig.get_path("include")}'
-        env["CXXFLAGS"] = "-fPIC"
+        # env["CXXFLAGS"] = "-fPIC"  # maybe not needed anymore
         if sys.platform.startswith("darwin"):
             env["FC"] = "gfortran"
 
@@ -61,7 +63,7 @@ class FastJetBuild(setuptools.command.build_ext.build_ext):
             check=True,
             env=env,
         )
-        subprocess.call(["make", "check"], cwd=MAINDIR)
+        subprocess.call(["make", "check", "-j"], cwd=MAINDIR)
         subprocess.call(["make", "install"], cwd=MAINDIR)
 
         setuptools.command.build_ext.build_ext.build_extensions(self)
@@ -167,5 +169,5 @@ ext_modules = [
 
 setup(
     ext_modules=ext_modules,
-    cmdclass={"build_ext": FastJetBuild},
+    cmdclass={"build_ext": FastJetBuild, "install": Install},
 )
