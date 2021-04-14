@@ -41,7 +41,7 @@ class FastJetBuild(setuptools.command.build_ext.build_ext):
         env["NOCONFIGURE"] = "1"
         env["PYTHON"] = sys.executable
         env["PYTHON_INCLUDE"] = f'-I{sysconfig.get_path("include")}'
-        # env["CXXFLAGS"] = "-fPIC"  # maybe not needed anymore
+        env["CXXFLAGS"] = "-fPIC"  
         if sys.platform.startswith("darwin"):
             env["FC"] = "gfortran"
 
