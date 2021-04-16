@@ -99,19 +99,19 @@ class Install(setuptools.command.install.install):
         print("--- copying includes ------------------------------------------")
         shutil.copytree(
             os.path.join(f"{DIR}/cgal/buildf_dir/lib/python3.8/site-packages"),
-            os.path.join(outerdir, "fastjet", "include"),
+            os.path.join(outerdir, "fastjet", "libs"),
         )
         shutil.copyfile(
             os.path.join(f"{DIR}/cgal/buildf_dir/lib/libfastjet.so.0"),
-            os.path.join(outerdir, "fastjet", "include", "libfastjet.so.0"),
+            os.path.join(outerdir, "fastjet", "libs", "libfastjet.so.0"),
         )
         shutil.copyfile(
             os.path.join(f"{DIR}/cgal/buildf_dir/lib/libfastjettools.so.0"),
-            os.path.join(outerdir, "fastjet", "include", "libfastjettools.so.0"),
+            os.path.join(outerdir, "fastjet", "libs", "libfastjettools.so.0"),
         )
         shutil.copyfile(
             os.path.join(f"{DIR}/src/__init__.py"),
-            os.path.join(outerdir, "fastjet", "include", "__init__.py"),
+            os.path.join(outerdir, "fastjet", "libs", "__init__.py"),
         )
 
         print("--- outerdir after copy ---------------------------------------")
